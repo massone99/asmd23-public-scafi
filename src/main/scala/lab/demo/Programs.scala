@@ -11,7 +11,7 @@ import it.unibo.scafi.space.graphics2D.BasicShape2D.Circle
 
 import scala.reflect._
 
-object Incarnation extends BasicAbstractIncarnation
+object Incarnation extends BasicAbstractIncarnation with BuildingBlocks
 import lab.demo.Incarnation._ //import all stuff from an incarnation
 
 class Simulation[R: ClassTag] extends App {
@@ -135,3 +135,19 @@ class Main16 extends AggregateProgramSkeleton:
     d => mux[Double](sense1){0.0}{minHoodPlus(nbr{d}+nbrRange)}
 
 object Demo16 extends Simulation[Main16]
+
+class Main17 extends AggregateProgramSkeleton with BlockG:
+  override def main() = gradientCast(sense1, 0.0, _ + nbrRange())
+
+object Demo17 extends Simulation[Main17]
+
+class Main18 extends AggregateProgramSkeleton with BlockG with BlockC:
+  override def main() =
+    val potential = gradientCast(sense1, 0.0, _ + nbrRange())
+    collectCast[Int](potential, _ + _, 1, 0)
+object Demo18 extends Simulation[Main18]
+
+class Main19 extends AggregateProgramSkeleton with BlockT:
+  override def main() =
+    decay(10000, 0, _ - 1)
+object Demo19 extends Simulation[Main19]
