@@ -14,11 +14,10 @@ import scala.reflect._
 object Incarnation extends BasicAbstractIncarnation with BuildingBlocks
 import lab.demo.Incarnation._ //import all stuff from an incarnation
 
-class Simulation[R: ClassTag] extends App {
-  ScafiSimulationInitializer
+trait Simulation[R: ClassTag] extends App:
   val formatter_evaluation: EXPORT_EVALUATION[Any] = (e : EXPORT) => formatter(e.root[Any]())
 
-  val formatter: Any => Any = (e) => e match {
+  val formatter: Any => Any = _ match
     case (a,b) => (formatter(a),formatter(b))
     case (a,b,c) => (formatter(a),formatter(b),formatter(c))
     case (a,b,c,d) => (formatter(a),formatter(b),formatter(c),formatter(d))
@@ -27,13 +26,13 @@ class Simulation[R: ClassTag] extends App {
     case i: java.lang.Number if (-i.doubleValue()>100000) => "-Inf"
     case i: java.lang.Double => f"${i.doubleValue()}%1.2f"
     case x => x.toString
-  }
 
   val nodes = 100
   val neighbourRange = 200
   val (width, height) = (1920, 1080)
 
   ViewSetting.windowConfiguration = WindowConfiguration(width, height)
+  ViewSetting.labelFontSize = 20
   ScafiProgramBuilder(
     Random(nodes, width, height),
     SimulationInfo(implicitly[ClassTag[R]].runtimeClass, exportEvaluations = List(formatter_evaluation)),
@@ -41,28 +40,24 @@ class Simulation[R: ClassTag] extends App {
     ScafiWorldInformation(shape = Some(Circle(5, 5))),
     neighbourRender = true,
   ).launch()
-}
 
-abstract class AggregateProgramSkeleton extends AggregateProgram with StandardSensors {
+trait AggregateProgramSkeleton extends AggregateProgram with StandardSensors:
   def sense1 = sense[Boolean]("sens1")
   def sense2 = sense[Boolean]("sens2")
   def sense3 = sense[Boolean]("sens3")
   def boolToInt(b: Boolean) = mux(b){1}{0}
-}
 
-class Main1 extends AggregateProgramSkeleton {
+
+class Main1 extends AggregateProgramSkeleton:
   override def main() = 1
-}
 object Demo1 extends Simulation[Main1]
 
-class Main2 extends AggregateProgramSkeleton {
+class Main2 extends AggregateProgramSkeleton:
   override def main() = 2+3
-}
 object Demo2 extends Simulation[Main2]
 
 class Main3 extends AggregateProgramSkeleton:
   override def main() = (10,20)
-
 object Demo3 extends Simulation[Main3]
 
 class Main4 extends AggregateProgramSkeleton:
@@ -137,17 +132,17 @@ class Main16 extends AggregateProgramSkeleton:
 object Demo16 extends Simulation[Main16]
 
 class Main17 extends AggregateProgramSkeleton with BlockG:
-  override def main() = gradientCast(sense1, 0.0, _ + nbrRange())
+  override def main() = gradientCast(source = sense1)(center = false)(accumulation = sense2 | _)
 
 object Demo17 extends Simulation[Main17]
 
 class Main18 extends AggregateProgramSkeleton with BlockG with BlockC:
   override def main() =
-    val potential = gradientCast(sense1, 0.0, _ + nbrRange())
-    collectCast[Int](potential, _ + _, 1, 0)
+    val potential = gradientCast(sense1)(0.0)(_ + nbrRange)
+    collectCast[Int](potential)(local = boolToInt(sense2))(Null = 0)(accumulation = _ + _)
 object Demo18 extends Simulation[Main18]
 
 class Main19 extends AggregateProgramSkeleton with BlockT:
   override def main() =
-    decay(10000, 0, _ - 1)
+    decay(10000, 0)(_ - 1)
 object Demo19 extends Simulation[Main19]
