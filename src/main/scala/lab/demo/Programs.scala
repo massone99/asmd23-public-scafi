@@ -91,6 +91,7 @@ class MainGatherNbrIds extends AggregateProgramSkeleton:
     // foldhood[Set[ID]](Set.empty)(_ union _) {
     // foldHoodPlus ignores the node itself
     foldhoodPlus[Set[ID]](Set.empty)(_ union _) {
+      // for each neighbour, gather its id in a Set
       nbr { Set(mid()) }
     }
 
