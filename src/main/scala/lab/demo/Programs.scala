@@ -89,7 +89,7 @@ object DemoMux extends Simulation[MainMuxExperiment]
 class MainGatherNbrIds extends AggregateProgramSkeleton:
   override def main() =
     // foldhood[Set[ID]](Set.empty)(_ union _) {
-    // 
+    // foldHoodPlus ignores the node itself
     foldhoodPlus[Set[ID]](Set.empty)(_ union _) {
       nbr { Set(mid()) }
     }
